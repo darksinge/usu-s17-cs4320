@@ -12,6 +12,7 @@
 
 import ir4320
 import PorterStemmer
+import index
 
 MY_NAME = "Your Name"
 MY_ANUM  = 0000000 # put your A number here without 'A'
@@ -30,11 +31,11 @@ I_AGREE_HONOR_CODE = False
 
 # this defines the student object
 student = ir4320.Student(
-    MY_NAME,
-    MY_ANUM,
-    MY_EMAIL,
-    COLLABORATORS,
-    I_AGREE_HONOR_CODE
+    'Craig Blackburn',
+    'a00952632',
+    'craig.blackburn@usu.edu',
+    [],
+    True
     )
 
 
@@ -43,7 +44,7 @@ student = ir4320.Student(
 # ########################################
 
 # our index class definition will hold all logic necessary to create and search
-# an index created from a directory of text files 
+# an index created from a directory of text files
 class Index(object):
     def __init__(self):
         # _inverted_index contains terms as keys, with the values as a list of
@@ -76,7 +77,7 @@ class Index(object):
     #     directory of text files to be indexed
     def index_dir(self, base_path):
         num_files_indexed = 0
-        # PUT YOUR CODE HERE
+        index.hello()
         return num_files_indexed
 
     # tokenize( text )
