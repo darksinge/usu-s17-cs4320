@@ -6,6 +6,7 @@ import re
 class Index(object):
     def __init__(self):
         self.index_items = {}
+        self.documents = []
 
     @staticmethod
     def extract_file(file_path):
@@ -47,13 +48,14 @@ class Index(object):
         result = " ".join(words)
         return result
 
-    def index(self, data, doc_id):
-        for item in data:
-            if self.index_items[item] is None:
-                self.index_items[item] = [doc_id]
-            else:
-                docs = list(self.index_items[item])
-                self.index_items[item] = docs.append(doc_id)
+    # indexes the given files.
+    def index(self):
+        for i in range(len(self.documents)):
+            pass
+
+
+    def add_doc(self, doc):
+        self.documents.append(doc)
 
 
 def main(args):
@@ -72,19 +74,29 @@ def main(args):
     content = ""
     f_delimiter = "/" if os.name is "posix" else "\\"
     for file in files:
-        foo = Index.extract_file(dir_path + f_delimiter + file)
-        content += foo
+        temp = Index.extract_file(dir_path + f_delimiter + file)
+        content += temp
+        temp = re.sub(r'([\n])+', ' ', temp).lower()
+        f_name = re.sub(r'\.txt', '', file)
+
+        # save parsed contents to file, because why not!
+        of = open(os.path.join(path.abspath("." + f_delimiter), f_name + "_parsed.txt"), 'w')
+        of.seek(0)
+        of.write(temp)
+        of.close()
+
+        # add document content to indexer
+        index.add_doc(temp)
 
     # write parsed content out to file to see what the heck my regex is doing. This is purely for academic reasons.
-    of = open(os.path.join(path.abspath("." + f_delimiter), 'content.txt'), 'w')
-    of.seek(0)
-    for c in content:
-        of.write(c)
-    of.close()
+    # of = open(os.path.join(path.abspath("." + f_delimiter), 'content.txt'), 'w')
+    # of.seek(0)
+    # for c in content:
+    #     of.write(c)
+    # of.close()
 
-    # grab parsed content, then index
-    content = re.sub(r'([\n\',\-])+', ' ', content)
-    print(content)
+    # index grabbed documents
+    index.index()
 
 
 
