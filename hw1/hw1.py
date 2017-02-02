@@ -14,28 +14,25 @@ import ir4320
 import PorterStemmer
 import Index
 
-MY_NAME = "Your Name"
-MY_ANUM  = 0000000 # put your A number here without 'A'
-MY_EMAIL = "somewhere@aggiemail.usu.edu"
+MY_NAME = "Craig Blackburn"
+MY_ANUM  = 952632 # put your A number here without 'A'
+MY_EMAIL = "craig.blackburn@usu.edu"
 
 # the COLLABORATORS list contains tuples of 2 items, the name of the helper
 # and their contribution to your homework
-COLLABORATORS = [ 
-    ('Bob Lee', 'helped me learn Python'),  
-    ('Brown Cheng', 'gave me coffee during office hours'),
-    ]
+COLLABORATORS = []
 
 # Set the I_AGREE_HONOR_CODE to True if you agree with the following statement
 # "An Aggie does not lie, cheat or steal, or tolerate those who do."
-I_AGREE_HONOR_CODE = False
+I_AGREE_HONOR_CODE = True
 
 # this defines the student object
 student = ir4320.Student(
-    'Craig Blackburn',
-    'a00952632',
-    'craig.blackburn@usu.edu',
-    [],
-    True
+    MY_NAME,
+    MY_ANUM,
+    MY_EMAIL,
+    COLLABORATORS,
+    I_AGREE_HONOR_CODE
     )
 
 

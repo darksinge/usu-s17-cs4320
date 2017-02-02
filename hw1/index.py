@@ -4,52 +4,60 @@ import re
 
 
 class Index(object):
+    def __init__(self):
+        self.index_items = {}
+
     @staticmethod
-    def index_file(file_path):
+    def extract_file(file_path):
         print("reading from " + file_path)
+        content = ""
         try:
-            content = ""
             with open(file_path, 'r') as f:
-                for line in f:
-                    content += parseText(line)
-            return content
+                content += Index.parse_text(f.read())
         except FileNotFoundError as e:
             print('File not found! ' + e.strerror + ".")
-        except:
-            print("An unknown error occurred!")
+        except Exception as e:
+            print(e)
         finally:
-            return ""
+            return content
 
     @staticmethod
-    def clean(data):
-        try:
-            if isinstance(data, str):
-                return re.sub(r".\"")
-        except IOError as e:
-            print(e.strerror)
-        except:
-            print('An unknown error occurred!')
+    def parse_text(text):
+        pattern = re.compile(r'([^\w\n])')
+        email_pattern = re.compile(r'[^@]+@[^@]+\.[^@]+')
+        new_line_pattern = re.compile(r'(\n\n)+')
+        text = re.sub(new_line_pattern, ' $', text)
+        words = text.split(" ")
+        for i in range(len(words)):
+            word = words[i]
+            try:
+                if "http" in word:
+                    continue
+                if re.match(email_pattern, word):
+                    continue
+                if re.match(pattern, word[-1]):
+                    words[i] = re.sub(pattern, '', word)
+                if re.match(pattern, word[0]):
+                    words[i] = re.sub(pattern, '', word)
+                words[i] = re.sub(pattern, '', word)
 
+            except Exception as e:
+                print(e)
 
-def parseText(text):
-    words = text.split(" ")
-    result = ""
-    w_pattern = re.compile(r'\W')
-    for word in words:
-        if "http" in word:
-            result += word + " "
-            print(word)
-        if re.match(w_pattern, word[0]):
-            word = word[1:]
-        if re.match(w_pattern, word[-1]):
-            word = word[:-1]
+        result = " ".join(words)
+        return result
 
-    result = " ".join(words) + "\n"
-    print(result)
-    return result
+    def index(self, data, doc_id):
+        for item in data:
+            if self.index_items[item] is None:
+                self.index_items[item] = [doc_id]
+            else:
+                docs = list(self.index_items[item])
+                self.index_items[item] = docs.append(doc_id)
 
 
 def main(args):
+    index = Index()
     if not args:
         args = './data'
 
@@ -61,16 +69,23 @@ def main(args):
 
     print("starting indexer...")
 
-    content = []
+    content = ""
+    f_delimiter = "/" if os.name is "posix" else "\\"
     for file in files:
-        content.append(Index.index_file(dir_path + "/" + file))
+        foo = Index.extract_file(dir_path + f_delimiter + file)
+        content += foo
 
-    of = open(os.path.join(path.abspath('./'), 'content.txt'), 'r+')
+    # write parsed content out to file to see what the heck my regex is doing. This is purely for academic reasons.
+    of = open(os.path.join(path.abspath("." + f_delimiter), 'content.txt'), 'w')
     of.seek(0)
     for c in content:
         of.write(c)
-
     of.close()
+
+    # grab parsed content, then index
+    content = re.sub(r'([\n\',\-])+', ' ', content)
+    print(content)
+
 
 
 main('data')
