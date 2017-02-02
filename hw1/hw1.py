@@ -12,7 +12,7 @@
 
 import ir4320
 import PorterStemmer
-import index
+import Index
 
 MY_NAME = "Your Name"
 MY_ANUM  = 0000000 # put your A number here without 'A'
@@ -77,7 +77,7 @@ class Index(object):
     #     directory of text files to be indexed
     def index_dir(self, base_path):
         num_files_indexed = 0
-        index.hello()
+        Index.index_file(base_path)
         return num_files_indexed
 
     # tokenize( text )

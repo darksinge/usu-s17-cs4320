@@ -19,13 +19,14 @@ class Student(object):
 
 
     def __repr__(self):
-        return """
-%s %s (uin:%d honor:%s)
-  - %s""" % (
-            COURSE,
-            self._name,
-            self._anum,
-            self._honor,
-            "\n  - ".join( "%s -- %s" % (x,y) for x,y in self._collabs )
-            )
+        return self._name
+#         return """
+# %s %s (uin:%d honor:%s)
+#   - %s""" % (
+#             COURSE,
+#             self._name,
+#             self._anum,
+#             self._honor,
+#             "\n  - ".join( "%s -- %s" % (x, y) for x, y in self._collabs)
+#             )
 
