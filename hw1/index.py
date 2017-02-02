@@ -9,19 +9,16 @@ class Index(object):
         print("reading from " + file_path)
         try:
             content = ""
-            pattern_1 = re.compile(r'\n')
-            pattern_2 = re.compile(r'[\W][^a-zA-Z0-9]')
             with open(file_path, 'r') as f:
                 for line in f:
-                    # temp = re.sub(pattern_1, '\n', line)
-                    # temp = re.sub(pattern_2, '', temp)
-                    content += line
+                    content += parseText(line)
             return content
         except FileNotFoundError as e:
             print('File not found! ' + e.strerror + ".")
-            return ""
         except:
             print("An unknown error occurred!")
+        finally:
+            return ""
 
     @staticmethod
     def clean(data):
@@ -32,6 +29,24 @@ class Index(object):
             print(e.strerror)
         except:
             print('An unknown error occurred!')
+
+
+def parseText(text):
+    words = text.split(" ")
+    result = ""
+    w_pattern = re.compile(r'\W')
+    for word in words:
+        if "http" in word:
+            result += word + " "
+            print(word)
+        if re.match(w_pattern, word[0]):
+            word = word[1:]
+        if re.match(w_pattern, word[-1]):
+            word = word[:-1]
+
+    result = " ".join(words) + "\n"
+    print(result)
+    return result
 
 
 def main(args):
