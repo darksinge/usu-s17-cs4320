@@ -1,11 +1,58 @@
-import os
+import os, re, pprint
 from os import path, listdir
-import re
+
+# needed this here because I worked in both a unix and windows environment
+# and on windows the file path delimiter was the "\" and in unix it is the "/"
+sys_file_path_delimiter = "/" if os.name is "posix" else "\\"
 
 
-class Index(object):
+# Class that color prints to the terminal, because why not?!
+HEADER = '\033[95m'
+OKBLUE = '\033[94m'
+OKGREEN = '\033[92m'
+WARNING = '\033[93m'
+FAIL = '\033[91m'
+ENDC = '\033[0m'
+BOLD = '\033[1m'
+UNDERLINE = '\033[4m'
+
+# print warning
+def printw(s):
+    print(WARNING + str(s) + ENDC)
+
+# print error
+def printe(s):
+    print(FAIL + str(s) + ENDC)
+
+# print success
+def prints(s):
+    print(OKGREEN + str(s) + ENDC)
+
+# print info
+def printi(s):
+    print(OKBLUE + str(s) + ENDC)
+
+# print header
+def printh(s):
+    print(HEADER + str(s) + ENDC)
+
+# pretty print
+def printp(s, indent=1):
+    pp = pprint.PrettyPrinter(indent=indent)
+    pp.pprint(s)
+
+def contains(l, x):
+    for value in l:
+        if value is x:
+            return True
+    return False
+
+class Indexer:
+    index = {}
+    documents = []
+
     def __init__(self):
-        self.index_items = {}
+        self.index = {}
         self.documents = []
 
     @staticmethod
@@ -14,7 +61,7 @@ class Index(object):
         content = ""
         try:
             with open(file_path, 'r') as f:
-                content += Index.parse_text(f.read())
+                content += Indexer.parse_text(f.read())
         except FileNotFoundError as e:
             print('File not found! ' + e.strerror + ".")
         except Exception as e:
@@ -43,61 +90,80 @@ class Index(object):
                 words[i] = re.sub(pattern, '', word)
 
             except Exception as e:
-                print(e)
+                words[i] = ""
+                printw("Warning: " + str(e))
 
         result = " ".join(words)
         return result
 
-    # indexes the given files.
-    def index(self):
+    # def index :: indexes the given files
+    def index_docs(self):
         for i in range(len(self.documents)):
-            pass
-
+            document = self.documents[i].split(" ")
+            for word in document:
+                if word not in self.index.keys():
+                    self.index[word] = [i]
+                    if self.index[word] is '':
+                        print('WHAT?!?!')
+                else:
+                    temp = self.index[word]
+                    try:
+                        if isinstance(temp, list):
+                            if not contains(temp, i):
+                                temp.append(i)
+                            self.index[word] = sorted(temp)
+                    except Exception as e:
+                        printw(e)
+        # if '' in self.index:
+        #     del self.index['']
 
     def add_doc(self, doc):
+        if isinstance(doc, str):
+            doc.strip()
         self.documents.append(doc)
 
 
 def main(args):
-    index = Index()
-    if not args:
-        args = './data'
 
-    if isinstance(args, list):
-        args = args.pop()
+    # make sure args is present, if not, look for a folder named 'data' in the current directory
+    if not args:
+        args = '.' + sys_file_path_delimiter + 'data'
 
     dir_path = path.abspath(args)
     files = listdir(dir_path)
 
     print("starting indexer...")
+    indexer = Indexer()
 
     content = ""
-    f_delimiter = "/" if os.name is "posix" else "\\"
+
     for file in files:
-        temp = Index.extract_file(dir_path + f_delimiter + file)
+        temp = Indexer.extract_file(dir_path + sys_file_path_delimiter + file)
         content += temp
         temp = re.sub(r'([\n])+', ' ', temp).lower()
         f_name = re.sub(r'\.txt', '', file)
 
         # save parsed contents to file, because why not!
-        of = open(os.path.join(path.abspath("." + f_delimiter), f_name + "_parsed.txt"), 'w')
+        of = open(os.path.join(path.abspath("." + sys_file_path_delimiter), f_name + "_parsed.txt"), 'w')
         of.seek(0)
         of.write(temp)
         of.close()
 
         # add document content to indexer
-        index.add_doc(temp)
+        indexer.add_doc(temp)
 
     # write parsed content out to file to see what the heck my regex is doing. This is purely for academic reasons.
-    # of = open(os.path.join(path.abspath("." + f_delimiter), 'content.txt'), 'w')
-    # of.seek(0)
-    # for c in content:
-    #     of.write(c)
-    # of.close()
+    of = open(os.path.join(path.abspath("." + sys_file_path_delimiter), 'content.txt'), 'w')
+    of.seek(0)
+    for c in content:
+        of.write(c)
+    of.close()
 
-    # index grabbed documents
-    index.index()
-
+    # index the documents!
+    indexer.index_docs()
+    printp(indexer.index, 3)
 
 
 main('data')
+
+
