@@ -8,44 +8,52 @@ sys_file_path_delimiter = "/" if os.name is "posix" else "\\"
 
 # Class that color prints to the terminal, because why not?!
 HEADER = '\033[95m'
-OKBLUE = '\033[94m'
-OKGREEN = '\033[92m'
+OK_BLUE = '\033[94m'
+OK_GREEN = '\033[92m'
 WARNING = '\033[93m'
 FAIL = '\033[91m'
 ENDC = '\033[0m'
 BOLD = '\033[1m'
 UNDERLINE = '\033[4m'
 
+
 # print warning
 def printw(s):
     print(WARNING + str(s) + ENDC)
+
 
 # print error
 def printe(s):
     print(FAIL + str(s) + ENDC)
 
+
 # print success
 def prints(s):
     print(OKGREEN + str(s) + ENDC)
+
 
 # print info
 def printi(s):
     print(OKBLUE + str(s) + ENDC)
 
+
 # print header
 def printh(s):
     print(HEADER + str(s) + ENDC)
+
 
 # pretty print
 def printp(s, indent=1):
     pp = pprint.PrettyPrinter(indent=indent)
     pp.pprint(s)
 
+
 def contains(l, x):
     for value in l:
         if value is x:
             return True
     return False
+
 
 class Indexer:
     index = {}
@@ -114,8 +122,6 @@ class Indexer:
                             self.index[word] = sorted(temp)
                     except Exception as e:
                         printw(e)
-        # if '' in self.index:
-        #     del self.index['']
 
     def add_doc(self, doc):
         if isinstance(doc, str):
