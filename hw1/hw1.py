@@ -12,8 +12,8 @@
 
 import ir4320
 import PorterStemmer
-import indexHelper
 import os
+import re
 
 MY_NAME = "Craig Blackburn"
 MY_ANUM = 952632  # put your A number here without 'A'
@@ -40,6 +40,20 @@ student = ir4320.Student(
 # ########################################
 # now, write some code
 # ########################################
+
+# needed this here because I worked in both a unix and windows environment
+# and on windows the file path delimiter was the "\" and in unix it is the "/"
+FP_DIL = "/" if os.name is "posix" else "\\"
+
+
+# print warning
+def printw(s):
+    print('\033[93m' + str(s) + '\033[0m')
+
+
+class IndexHelper:
+
+    pass
 
 # helper function index_of(l, v) where l is a list and v is an object
 # returns index of v in l or -1 if v is not in l
@@ -100,12 +114,12 @@ class Index(object):
         for file in files:
             doc = {}
             doc['name'] = file
-            doc['content'] = indexHelper.process_file(base_path, file)
+            doc['content'] = self.process_file(base_path, file)
             self._documents.append(doc)
 
         # tokenize documents
         for i in range(len(self._documents)):
-            self._documents[i]['tokens'] = indexHelper.tokenize(self._documents[i]['content'])
+            self._documents[i]['tokens'] = self.tokenize(self._documents[i]['content'])
 
         # stem tokens
         for i in range(len(self._documents)):
@@ -132,18 +146,18 @@ class Index(object):
         return len(files)
 
     # tokenize( text )
-    # purpose: convert a string of terms into a list of tokens.        
-    # convert the string of terms in text to lower case and replace each character in text, 
+    # purpose: convert a string of terms into a list of tokens.
+    # convert the string of terms in text to lower case and replace each character in text,
     # which is not an English alphabet (a-z) and a numerical digit (0-9), with whitespace.
     # preconditions: none
     # returns: list of tokens contained within the text
     # parameters:
     #   text - a string of terms
     def tokenize(self, text):
-        return indexHelper.tokenize(text)
+        return self.tokenize(text)
 
-    # purpose: convert a string of terms into a list of tokens.        
-    # convert a list of tokens to a list of stemmed tokens,     
+    # purpose: convert a string of terms into a list of tokens.
+    # convert a list of tokens to a list of stemmed tokens,
     # preconditions: tokenize a string of terms
     # returns: list of stemmed tokens
     # parameters:
@@ -156,9 +170,9 @@ class Index(object):
         return stemmed_tokens
 
     # boolean_search( text )
-    # purpose: searches for the terms in "text" in our corpus using logical OR or logical AND. 
-    # If "text" contains only single term, search it from the inverted index. If "text" contains three terms including "or" or "and", 
-    # do OR or AND search depending on the second term ("or" or "and") in the "text".  
+    # purpose: searches for the terms in "text" in our corpus using logical OR or logical AND.
+    # If "text" contains only single term, search it from the inverted index. If "text" contains three terms including "or" or "and",
+    # do OR or AND search depending on the second term ("or" or "and") in the "text".
     # preconditions: _inverted_index and _documents have been populated from
     #   the corpus.
     # returns: list of document names containing relevant search results
@@ -226,6 +240,31 @@ class Index(object):
             names.append(self._documents[i]['name'])
         return names
 
+    @staticmethod
+    def tokenize(doc_text):
+        try:
+            r_tokens = re.sub(r'[\W_]', ' ', doc_text).lower()
+            tokens = re.sub(r'\s\s+', ' ', r_tokens).split(' ')
+        except Exception as e:
+            printw(e)
+            tokens = doc_text.lower().split(' ')
+        # print(tokens)
+        return tokens
+
+    @staticmethod
+    def process_file(base_path, file_name):
+        dir_path = os.path.abspath(base_path)
+        file_path = dir_path + FP_DIL + file_name
+        content = ""
+        try:
+            with open(file_path, 'r') as f:
+                content += f.read()
+        except FileNotFoundError as e:
+            print('File not found! ' + e.strerror + ".")
+        except Exception as e:
+            print(e)
+        finally:
+            return content
 
 # now, we'll define our main function which actually starts the indexer and
 # does a few queries
