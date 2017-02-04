@@ -80,7 +80,7 @@ class Index(object):
 
         index = {}
         for file in files:
-            index.update(MyIndex.main([base_path, file]))
+            index.update(MyIndex.main('asdf'))
 
         self._inverted_index = index
         print(json.dumps(self._inverted_index, indent=3))
