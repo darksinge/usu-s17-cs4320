@@ -1,9 +1,11 @@
-import os, re, pprint
+import os
+import re
+import pprint
 from os import path, listdir
 
 # needed this here because I worked in both a unix and windows environment
 # and on windows the file path delimiter was the "\" and in unix it is the "/"
-sys_file_path_delimiter = "/" if os.name is "posix" else "\\"
+FP_DIL = "/" if os.name is "posix" else "\\"
 
 
 # Class that color prints to the terminal, because why not?!
@@ -29,12 +31,12 @@ def printe(s):
 
 # print success
 def prints(s):
-    print(OKGREEN + str(s) + ENDC)
+    print(OK_GREEN + str(s) + ENDC)
 
 
 # print info
 def printi(s):
-    print(OKBLUE + str(s) + ENDC)
+    print(OK_BLUE + str(s) + ENDC)
 
 
 # print header
@@ -101,7 +103,7 @@ class Indexer:
                 words[i] = ""
                 printw("Warning: " + str(e))
 
-        result = " ".join(words)
+        result = " ".join(words).lower()
         return result
 
     # def index :: indexes the given files
@@ -111,8 +113,6 @@ class Indexer:
             for word in document:
                 if word not in self.index.keys():
                     self.index[word] = [i]
-                    if self.index[word] is '':
-                        print('WHAT?!?!')
                 else:
                     temp = self.index[word]
                     try:
@@ -122,7 +122,9 @@ class Indexer:
                             self.index[word] = sorted(temp)
                     except Exception as e:
                         printw(e)
+        del self.index['']
 
+    # add a document to self.documents
     def add_doc(self, doc):
         if isinstance(doc, str):
             doc.strip()
@@ -130,44 +132,39 @@ class Indexer:
 
 
 def main(args):
+    base_path = args[0]
+    file_name = args[1]
 
-    # make sure args is present, if not, look for a folder named 'data' in the current directory
-    if not args:
-        args = '.' + sys_file_path_delimiter + 'data'
-
-    dir_path = path.abspath(args)
-    files = listdir(dir_path)
+    dir_path = path.abspath(base_path)
+    file_path = dir_path + FP_DIL + file_name
 
     print("starting indexer...")
     indexer = Indexer()
 
-    content = ""
-
-    for file in files:
-        temp = Indexer.extract_file(dir_path + sys_file_path_delimiter + file)
-        content += temp
-        temp = re.sub(r'([\n])+', ' ', temp).lower()
-        f_name = re.sub(r'\.txt', '', file)
-
-        # save parsed contents to file, because why not!
-        of = open(os.path.join(path.abspath("." + sys_file_path_delimiter), f_name + "_parsed.txt"), 'w')
-        of.seek(0)
-        of.write(temp)
-        of.close()
-
-        # add document content to indexer
-        indexer.add_doc(temp)
+    content = Indexer.extract_file(file_path)
 
     # write parsed content out to file to see what the heck my regex is doing. This is purely for academic reasons.
-    of = open(os.path.join(path.abspath("." + sys_file_path_delimiter), 'content.txt'), 'w')
-    of.seek(0)
-    for c in content:
-        of.write(c)
-    of.close()
+    with open(os.path.join(path.abspath("." + FP_DIL), re.sub(r'\.txt', '', dir_path + FP_DIL + "extracted data" + FP_DIL + file_name) + "_parsed.txt"), 'w') as fout:
+        fout.write(content)
+
+    # remove new line characters
+    content = re.sub(r'([\n])+', ' ', content).lower()
+
+    # add document content to indexer
+    indexer.add_doc(content)
 
     # index the documents!
     indexer.index_docs()
-    printp(indexer.index, 3)
+
+    # write it out to file to get visual idea of whats going on
+    with open(os.path.join(path.abspath("." + FP_DIL), 'index.txt'), 'w') as f:
+        f.write("{\n")
+        for key in indexer.index:
+            f.write("\t\"" + key + "\": " + str(indexer.index[key]) + ",\n")
+        f.write("\n}")
+
+    # return the result
+    return indexer.index
 
 
 main('data')

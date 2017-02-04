@@ -12,7 +12,9 @@
 
 import ir4320
 import PorterStemmer
-import Index
+import MyIndex
+import simplejson as json
+import os
 
 MY_NAME = "Craig Blackburn"
 MY_ANUM  = 952632 # put your A number here without 'A'
@@ -73,9 +75,16 @@ class Index(object):
     #   base_path - a string containing a relative or direct path to a
     #     directory of text files to be indexed
     def index_dir(self, base_path):
-        num_files_indexed = 0
-        Index.index_file(base_path)
-        return num_files_indexed
+        dir_path = os.path.abspath(base_path)
+        files = os.listdir(dir_path)
+
+        index = {}
+        for file in files:
+            index.update(MyIndex.main([base_path, file]))
+
+        self._inverted_index = index
+        print(json.dumps(self._inverted_index, indent=3))
+        return len(files)
 
     # tokenize( text )
     # purpose: convert a string of terms into a list of tokens.        
